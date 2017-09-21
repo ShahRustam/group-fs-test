@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="row text-center" style="padding: 0 25px">
+        {#        <h3>Select table:</h3>#}
+        {% if names!=[] %}
+            <hr>
+            <ul class="nav nav-pills nav-fill nav-justified">
+                {% for oneName in names %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if name==oneName %}active{% endif %}"
+                           href="/view/{{ oneName }}">{{ oneName }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+            <hr>
+        {% endif %}
+        {% if data!=[] %}
+            {{ pagination.links }}
+            <h4>To change the cell, click on it. Changes will be saved to defocus the field.</h4>
+            <div class="table-responsive">
+                <table width="100%" class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        {% for row in data[0].keys() %}
+                            {% if row!="_id" %}
+                                <th width="{{ 100.0/(data[0].keys()|length) }}%">{{ row.split(row.split('-')[0]+"-")[1] }}</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in data %}
+                        <tr>
+                            {% for keyName in data[0].keys() %}
+                                {% if keyName!="_id" %}
+                                    <td width="{{ 100.0/(row.keys()|length) }}%" class="table-edit-td"
+                                        style="padding: 0">
+                                        <input id="{{ row.get("_id") }}__{{ keyName }}" class="online-change-input"
+                                               style="padding: 10px;border: 0;background: transparent"
+                                               value="{{ row.get(keyName) }}">
+                                        {#                                        <span>{{ row.get(keyName) }}</span>#}
+                                        {#                                        <button class="btn table-edit-btn">Edit</button>#}
+                                    </td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {{ pagination.links }}
+        {% endif %}
+    </div>
+    <script>
+        $(".online-change-input").focusout(function () {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', window.location.origin + window.location.pathname + "/" + this.id, true);
+            xhr.withCredentials = true;
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.send("value=" + this.value);
+            xhr.onreadystatechange = function () { // (3)
+                if (xhr.readyState != 4) return;
+                var json = JSON.parse(xhr.responseText);
+{#                $("#loading-wrapper").hide();#}
+                console.log(json);
+                if (xhr.status == 200) {
+                    console.log("UPDATED")
+                }
+                // if xhr.status != 200 then json format: {status: 0, errors: ["errorKey":"invalid_email_fromat", "errorMessage":"Invalid email format"] }
+                // You can displayed errorMessage as a error
+
+                if (xhr.status != 200) {
+                    console.log("ERROR")
+                }
+            };
+{#            $("#loading-wrapper").show();#}
+        });
+
+        function sendFile() {
+            var xhr = new XMLHttpRequest();
+            var formData = new FormData(document.forms.load_form);
+            xhr.open('POST', window.location.origin + "/uploadSQL", true);
+            xhr.withCredentials = true;
+            xhr.send(formData);
+            xhr.onreadystatechange = function () { // (3)
+                if (xhr.readyState != 4) return;
+                var json = JSON.parse(xhr.responseText);
+                $("#loading-wrapper").hide();
+                console.log(json);
+                if (xhr.status == 200) {
+                    if (json.status == 1) {
+                        window.location.pathname = "/";
+                    }
+                }
+                // if xhr.status != 200 then json format: {status: 0, errors: ["errorKey":"invalid_email_fromat", "errorMessage":"Invalid email format"] }
+                // You can displayed errorMessage as a error
+
+                if (xhr.status != 200) {
+
+                }
+            };
+            $("#loading-wrapper").show();
+
+
+        }
+
+    </script>
+{% endblock %}

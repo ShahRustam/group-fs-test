@@ -4,6 +4,7 @@ print str(time.time())
 
 import sqlparse
 import re
+import collections
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)
@@ -39,15 +40,18 @@ for script in parses:
         data[firstRE[0][0]].append(eval(firstRE[0][1].replace("NULL", "''")))
 
 for collection in tableNames:
-    dbCol = db[collection.get("tableName")]
-    colData = data.get(collection.get("tableName"))
-    fields = collection.get("fields")
-    for row in colData:
-        oneData = {}
-        for val in row:
-            index = row.index(val)
-            valName = fields[index].get("name")
-            oneData[valName] = val
-        dbCol.insert(oneData)
+    if collection.get("tableName") == "joke_ratings":
+        dbCol = db[collection.get("tableName")]
+        colData = data.get(collection.get("tableName"))
+        fields = collection.get("fields")
+        #print fields
+        for row in colData:
+            oneData = collections.OrderedDict()
+            for field in fields:
+                index = fields.index(field)
+                val = row[index]
+                oneData[str(index)+"-"+field.get("name")] = val
+            dbCol.insert(oneData)
+        print str(dbCol.find_one())
 
 print str(time.time())

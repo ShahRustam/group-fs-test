@@ -14,55 +14,18 @@
         </div>
     </div>
     <hr>
-    <div class="row" style="padding: 0 25px">
-        {% if data!=[] %}
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                {% for row in data %}
-                    <li class="nav-item {% if loop.first %}active{% endif %}">
-                        <a class="nav-link {% if loop.first %}active{% endif %}" id="{{ row.name }}-tab"
-                           data-toggle="tab" href="#{{ row.name }}"
-                           role="tab"
-                           aria-controls="{{ row.name }}" aria-expanded="true">{{ row.name }}</a>
+    <div class="row text-center" style="padding: 0 25px">
+        <h3>Select table:</h3>
+        {% if names!=[] %}
+            <hr>
+            <ul class="nav nav-pills nav-fill nav-justified">
+                {% for name in names %}
+                    <li class="nav-item">
+                        <a class="nav-link " href="/view/{{ name }}">{{ name }}</a>
                     </li>
                 {% endfor %}
-
             </ul>
-            <div class="tab-content" id="myTabContent">
-                {% for row in data %}
-                    <div class="tab-pane table-responsive fade {% if loop.first %}active in{% endif %}"
-                         id="{{ row.name }}"
-                         role="tabpanel"
-                         style="max-height: 55vh;"
-                         aria-labelledby="{{ row.name }}-tab">
-                        {#                         <span>{{ row.data }}</span>#}
-                        <table width="100%" class="table table-bordered table-striped">
-                            <thead>
-                            <tr>
-                                {% for oneRow in row.data[0].keys() %}
-                                    {% if oneRow!="_id" %}
-                                        <th width="{{ 100.0/(row.data[0].keys()|length) }}%">{{ oneRow }}</th>
-                                    {% endif %}
-                                {% endfor %}
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for oneRow in row.data %}
-                                <tr>
-                                    {% for keyName in row.data[0].keys() %}
-                                        {% if keyName!="_id" %}
-                                            <td width="{{ 100.0/(row.data[0].keys()|length) }}%" class="table-edit-td">
-                                                <span>{{ oneRow.get(keyName) }}</span>
-                                                <button class="btn table-edit-btn">Edit</button>
-                                            </td>
-                                        {% endif %}
-                                    {% endfor %}
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% endfor %}
-            </div>
+            <hr>
         {% endif %}
     </div>
     <script>

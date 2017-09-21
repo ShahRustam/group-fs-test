@@ -4,3 +4,4 @@ validate_email
 pyDNS
 sqlparse
 Flask-HTMLmin
+flask_paginate

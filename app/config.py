@@ -12,7 +12,9 @@ from hashlib import sha512
 from time import time
 import sqlparse
 import re
-from flask.ext.htmlmin import HTMLMIN
+from flask_htmlmin import HTMLMIN
+from bson.objectid import ObjectId
+from flask_paginate import Pagination, get_page_parameter
 
 
 client = MongoClient("db",27017)

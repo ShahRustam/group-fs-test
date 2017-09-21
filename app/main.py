@@ -14,6 +14,8 @@ from app.controller.signUp import SignUp
 from app.controller.main import Main
 from app.controller.logout import Logout
 from app.controller.uploadSQL import UploadSQL
+from app.controller.tableView import TableView
+from app.controller.updateField import UpdateField
 
 app = Flask(__name__)
 
@@ -38,6 +40,12 @@ app.add_url_rule('/logout', view_func=LogoutView, methods=['GET', 'POST'])
 
 UploadSQLView = UploadSQL.as_view('UploadSQL')
 app.add_url_rule('/uploadSQL', view_func=UploadSQLView, methods=['GET', 'POST'])
+
+TableViewView = TableView.as_view('TableView')
+app.add_url_rule('/view/<name>', view_func=TableViewView, methods=['GET', 'POST'])
+
+UpdateFieldView = UpdateField.as_view('UpdateField')
+app.add_url_rule('/view/<name>/<link>', view_func=UpdateFieldView, methods=['GET', 'POST'])
 
 if __name__ == '__main__':
     # try:

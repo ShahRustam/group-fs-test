@@ -34,6 +34,9 @@
                 {% if loginIn %}
                     <ul class="nav navbar-nav">
                         <li style="padding: 15px;color: white;font-size: 16px;">Hi, {{ user.fullname }}!</li>
+                        {% if pageName!="main" %}
+                            <li><a href="/">Main</a></li>
+                        {% endif %}
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li><a class="red" onclick="$('#loading-wrapper').show()" href="/logout">Logout</a></li>

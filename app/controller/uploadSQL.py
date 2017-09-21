@@ -37,16 +37,16 @@ class UploadSQL(MethodView):
                 firstRE = re.findall(tableNamesInsertRE, string)
                 if data.get(firstRE[0][0]) is None:
                     data[firstRE[0][0]] = []
-                data[firstRE[0][0]].append(eval(firstRE[0][1].replace("NULL", "''")))
+                data[firstRE[0][0]].append(eval(firstRE[0][1].replace("NULL", "' '")))
         for collection in tableNames:
             dbCol = db[collection.get("tableName")]
             colData = data.get(collection.get("tableName"))
             fields = collection.get("fields")
             for row in colData:
-                oneData = {}
-                for val in row:
-                    index = row.index(val)
-                    valName = fields[index].get("name")
-                    oneData[valName] = val
+                oneData = collections.OrderedDict()
+                for field in fields:
+                    index = fields.index(field)
+                    val = row[index]
+                    oneData[str(index) + "-" + field.get("name")] = val
                 dbCol.insert(oneData)
         return jsonify({"status": 1, "data": []})
