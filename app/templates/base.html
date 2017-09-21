@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="http-equiv" content="Content-type: text/html; charset=UTF-8">
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport'/>
+    <script>
+        if (typeof module === 'object') {
+            window.module = module;
+            module = undefined;
+        }
+    </script>
+    <script charset="utf-8" src="{{ url_for('static', filename='js/jquery-3.2.0.min.js') }}"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link type="text/css" href="https://fonts.googleapis.com/css?family=Comfortaa:400,700" rel="stylesheet">
+    <title>{{ title }}</title>
+
+</head>
+<body>
+
+<div id="loading-wrapper">
+    <div id="loading-content"></div>
+</div>
+
+
+<div class="container-fluid">
+    <header>
+
+        <nav class="navbar navbar-default">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                {% if loginIn %}
+                    <ul class="nav navbar-nav">
+                        <li style="padding: 15px;color: white;font-size: 16px;">Hi, {{ user.fullname }}!</li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a class="red" onclick="$('#loading-wrapper').show()" href="/logout">Logout</a></li>
+                    </ul>
+                {% endif %}
+            </div>
+        </nav>
+
+    </header>
+
+    <div class="">
+        {% block content %}
+
+        {% endblock %}
+
+    </div>
+
+
+</div>
+</body>
+<script>
+
+</script>
+<script charset="utf-8" src="{{ url_for('static', filename='js/main.min.js') }}"></script>
+<script charset="utf-8" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+<script>if (window.module) module = window.module;</script>
+</html>

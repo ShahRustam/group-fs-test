@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="row text-center">
+        <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-12">
+            <div class="row" id="sign-in-block">
+                <h2>Login</h2>
+                <form name="signInForm" class="text-left">
+                    <label for="email">Please, enter email:</label>
+                    <input required class="form-control" id="email" name="email">
+                    <label for="password">Please, enter password:</label>
+                    <input required type="password" class="form-control" id="password" name="password">
+                </form>
+
+                <button onclick="sendSignIn()" class="btn btn-default onEnterSubmit">Login</button>
+
+            </div>
+            <div class="row">
+                <a href="/signUp" >Need to create account? >></a>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        function sendSignIn() {
+            var formData = new FormData(document.forms.signInForm);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', window.location.href, true);
+            xhr.withCredentials = true;
+            xhr.send(formData);
+            xhr.onreadystatechange = function () { // (3)
+                $("#alerts").empty();
+                if (xhr.readyState != 4) return;
+                $("#loading-wrapper").hide();
+                var json = JSON.parse(xhr.responseText);
+                if (xhr.status == 200) {
+                    var date = new Date(new Date().getTime() + 84000 * 1000);
+                    document.cookie = "Token-Key=" + json.token + "; path=/; expires=" + date.toUTCString() + "; domain=" + window.location.hostname;
+                    document.cookie = "Token-Expired=" + json.expired + "; path=/; expires=" + date.toUTCString() + "; domain=" + window.location.hostname;
+                    window.location.pathname = "/";
+                }
+
+                // if xhr.status != 200 then json format: {status: 0, errors: ["errorKey":"invalid_email_fromat", "errorMessage":"Invalid email format"] }
+                // You can displayed errorMessage as a error
+                if (xhr.status != 200) {
+                    if (json.status == 0) {
+                        console.log(json);
+                        var topLabel;
+                        json.errors.map(function (item, index) {
+                                element = $('#' + item.errorKey.split('_')[0]);
+                                labelFor = $('label[for=' + item.errorKey.split('_')[0] + ']');
+                                if (index == 0) {
+                                    topLabel = labelFor
+                                }
+                                if (!element.hasClass('input--error')) {
+                                    element.addClass('input--error');
+                                    labelFor.append('<span class="error-message">' + item.errorMessage + '</span>');
+                                }
+                            }
+                        );
+                        $("html, body").animate({scrollTop: topLabel.offset().top - 100}, 1000);
+
+                    } else {
+                        $('.input--error').removeClass('input--error');
+                        $('.error-message').remove();
+                    }
+
+                }
+
+            };
+            $("#loading-wrapper").show();
+        }
+    </script>
+{% endblock %}
