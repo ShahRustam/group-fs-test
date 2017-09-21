@@ -38,8 +38,6 @@
                                         <input id="{{ row.get("_id") }}__{{ keyName }}" class="online-change-input"
                                                style="padding: 10px;border: 0;background: transparent"
                                                value="{{ row.get(keyName) }}">
-                                        {#                                        <span>{{ row.get(keyName) }}</span>#}
-                                        {#                                        <button class="btn table-edit-btn">Edit</button>#}
                                     </td>
                                 {% endif %}
                             {% endfor %}
@@ -61,7 +59,6 @@
             xhr.onreadystatechange = function () { // (3)
                 if (xhr.readyState != 4) return;
                 var json = JSON.parse(xhr.responseText);
-{#                $("#loading-wrapper").hide();#}
                 console.log(json);
                 if (xhr.status == 200) {
                     console.log("UPDATED")
@@ -73,7 +70,6 @@
                     console.log("ERROR")
                 }
             };
-{#            $("#loading-wrapper").show();#}
         });
 
         function sendFile() {
