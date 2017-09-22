@@ -45,7 +45,7 @@ TableViewView = TableView.as_view('TableView')
 app.add_url_rule('/view/<name>', view_func=TableViewView, methods=['GET', 'POST'])
 
 UpdateFieldView = UpdateField.as_view('UpdateField')
-app.add_url_rule('/view/<name>/<link>', view_func=UpdateFieldView, methods=['GET', 'POST'])
+app.add_url_rule('/view/<name>/<link>', view_func=UpdateFieldView, methods=['GET', 'POST', 'DELETE'])
 
 if __name__ == '__main__':
     # try:

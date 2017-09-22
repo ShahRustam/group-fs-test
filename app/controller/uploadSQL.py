@@ -47,6 +47,12 @@ class UploadSQL(MethodView):
                 for field in fields:
                     index = fields.index(field)
                     val = row[index]
-                    oneData[str(index) + "-" + field.get("name")] = val
+                    try:
+                        oneData[str(index) + "-" + field.get("name")] = int(val)
+                    except:
+                        try:
+                            oneData[str(index) + "-" + field.get("name")] = float(val)
+                        except:
+                            oneData[str(index) + "-" + field.get("name")] = val
                 dbCol.insert(oneData)
         return jsonify({"status": 1, "data": []})
