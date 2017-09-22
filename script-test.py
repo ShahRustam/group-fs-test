@@ -10,6 +10,7 @@ from pymongo import MongoClient
 client = MongoClient('localhost', 27017)
 db = client.test_database
 
+#file = open('groupfs_new_20170922.sql')
 file = open('mrjoke.sql')
 file = file.read()
 
@@ -19,8 +20,22 @@ tableNamesCreateRE = "TABLE '(\w*)' (\(.*\))"
 tableNamesInsertRE = "INTO '(\w*)' VALUES (\(.*\))"
 fieldsNamesRE = "'(\w*)' ([\w\(\),]*)"
 
+fieldInFieldsRe = "\((.*)\)"
+
 tableNames = []
 data = {}
+
+
+def replaceType(x):
+    x = re.sub("['],[']", '""","""', x)
+    x = re.sub("([^'\s]),[']", r'\1,"""', x)
+    x = re.sub("['],([^'\s])", r'""",\1', x)
+    x = re.sub("[\(](['])", '("""', x)
+    x = re.sub("(['])[\)]", '""")', x)
+    if x[-2:]=="))":
+        x = x[:-1]
+    return x
+
 
 for script in parses:
     if script.get_type() == "CREATE":
@@ -37,21 +52,46 @@ for script in parses:
         firstRE = re.findall(tableNamesInsertRE, string)
         if data.get(firstRE[0][0]) is None:
             data[firstRE[0][0]] = []
-        data[firstRE[0][0]].append(eval(firstRE[0][1].replace("NULL", "''")))
+        if firstRE[0][1].count("(") > 1:
+            array = firstRE[0][1].split("),(")
+            for index, row in enumerate(array):
+                if index == 0:
+                    data[firstRE[0][0]].append(eval(
+                        replaceType(row + ")").replace("NULL", '""" """').strip()
+                    ))
+                elif index == (len(array) - 1):
+                    data[firstRE[0][0]].append(eval(
+                        replaceType("(" + row).replace("NULL", '""" """').strip()
+                    ))
+                else:
+                    # print "START:" + "(" + row + ")" + ":STOP"
+                    data[firstRE[0][0]].append(
+                        eval(
+                            replaceType("(" + row + ")").replace("NULL", '""" """').strip()
+                        ))
+        else:
+            data[firstRE[0][0]].append(eval(replaceType(firstRE[0][1]).replace("NULL", '""" """').strip()))
+
+# print data.get("wp_posts")[:5]
+print "______________________"
 
 for collection in tableNames:
-    if collection.get("tableName") == "joke_ratings":
-        dbCol = db[collection.get("tableName")]
-        colData = data.get(collection.get("tableName"))
-        fields = collection.get("fields")
-        #print fields
+    dbCol = db[collection.get("tableName")]
+    colData = data.get(collection.get("tableName"))
+    fields = collection.get("fields")
+    if colData:
         for row in colData:
             oneData = collections.OrderedDict()
             for field in fields:
                 index = fields.index(field)
                 val = row[index]
-                oneData[str(index)+"-"+field.get("name")] = val
+                try:
+                    oneData[str(index) + "-" + field.get("name")] = int(val)
+                except:
+                    try:
+                        oneData[str(index) + "-" + field.get("name")] = float(val)
+                    except:
+                        oneData[str(index) + "-" + field.get("name")] = val
             dbCol.insert(oneData)
-        print str(dbCol.find_one())
-
+#
 print str(time.time())

@@ -19,8 +19,9 @@ class UploadSQL(MethodView):
         fieldsNamesRE = "'(\w*)' ([\w\(\),]*)"
         tableNames = []
         data = {}
-        for name in client[str(user.get("_id"))].collection_names(include_system_collections=False):
-            client[str(user.get("_id"))][name].delete_many({})
+        client.drop_database(str(user.get("_id")))
+        # for name in client[].collection_names(include_system_collections=False):
+        #     client[str(user.get("_id"))][name].delete_many({})
         db = client[str(user.get("_id"))]
         for script in parses:
             if script.get_type() == "CREATE":
@@ -37,22 +38,51 @@ class UploadSQL(MethodView):
                 firstRE = re.findall(tableNamesInsertRE, string)
                 if data.get(firstRE[0][0]) is None:
                     data[firstRE[0][0]] = []
-                data[firstRE[0][0]].append(eval(firstRE[0][1].replace("NULL", "' '")))
+                if firstRE[0][1].count("(") > 1:
+                    array = firstRE[0][1].split("),(")
+                    for index, row in enumerate(array):
+                        if index == 0:
+                            data[firstRE[0][0]].append(eval(
+                                self.replaceType(row + ")").replace("NULL", '""" """').strip()
+                            ))
+                        elif index == (len(array) - 1):
+                            data[firstRE[0][0]].append(eval(
+                                self.replaceType("(" + row).replace("NULL", '""" """').strip()
+                            ))
+                        else:
+                            # print "START:" + "(" + row + ")" + ":STOP"
+                            data[firstRE[0][0]].append(
+                                eval(
+                                    self.replaceType("(" + row + ")").replace("NULL", '""" """').strip()
+                                ))
+                else:
+                    data[firstRE[0][0]].append(eval(self.replaceType(firstRE[0][1]).replace("NULL", '""" """').strip()))
         for collection in tableNames:
             dbCol = db[collection.get("tableName")]
             colData = data.get(collection.get("tableName"))
             fields = collection.get("fields")
-            for row in colData:
-                oneData = collections.OrderedDict()
-                for field in fields:
-                    index = fields.index(field)
-                    val = row[index]
-                    try:
-                        oneData[str(index) + "-" + field.get("name")] = int(val)
-                    except:
+            if colData:
+                for row in colData:
+                    oneData = collections.OrderedDict()
+                    for field in fields:
+                        index = fields.index(field)
+                        val = row[index]
                         try:
-                            oneData[str(index) + "-" + field.get("name")] = float(val)
+                            oneData[str(index) + "-" + field.get("name")] = int(val)
                         except:
-                            oneData[str(index) + "-" + field.get("name")] = val
-                dbCol.insert(oneData)
+                            try:
+                                oneData[str(index) + "-" + field.get("name")] = float(val)
+                            except:
+                                oneData[str(index) + "-" + field.get("name")] = val
+                    dbCol.insert(oneData)
         return jsonify({"status": 1, "data": []})
+
+    def replaceType(self,x):
+        x = re.sub("['],[']", '""","""', x)
+        x = re.sub("([^'\s]),[']", r'\1,"""', x)
+        x = re.sub("['],([^'\s])", r'""",\1', x)
+        x = re.sub("[\(](['])", '("""', x)
+        x = re.sub("(['])[\)]", '""")', x)
+        if x[-2:] == "))":
+            x = x[:-1]
+        return x
