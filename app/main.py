@@ -21,7 +21,7 @@ app = Flask(__name__)
 
 app.secret_key = secret_key
 app.config["JSON_SORT_KEYS"] = False
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400
 app.config['MINIFY_PAGE'] = True
 
 HTMLMIN(app)
